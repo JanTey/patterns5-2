@@ -1,6 +1,8 @@
 package ru.netology.quamid59.test;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,11 +15,18 @@ import static ru.netology.quamid59.data.DataGenerator.Registration.getUser;
 import static ru.netology.quamid59.data.DataGenerator.getRandomLogin;
 import static ru.netology.quamid59.data.DataGenerator.getRandomPassword;
 
-class AuthTest {
+public class AuthTest {
 
     @BeforeEach
     void setup() {
         open("http://localhost:9999");
+        Configuration.holdBrowserOpen = true;
+    }
+
+    @AfterEach
+    void memoryClear() {
+        clearBrowserCookies();
+        clearBrowserLocalStorage();
     }
 
 

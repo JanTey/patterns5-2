@@ -34,6 +34,9 @@ public class DataGenerator {
                 .statusCode(200);
     }
 
+    public DataGenerator() {
+    }
+
     public static String getRandomLogin() {
         String login = faker.name().username();
         return login;
