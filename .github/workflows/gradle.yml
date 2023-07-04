@@ -26,8 +26,8 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Run SUT
-        run:  java -jar ./artifacts/app-ibank.jar -P:profile=test & sleep 10
+        run:  java -jar ./artifacts/app-ibank.jar -P:profile=test &
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew test -Dselenide.headless=true --info
+        run: ./gradlew clean test --info -Dselenide.headless=true

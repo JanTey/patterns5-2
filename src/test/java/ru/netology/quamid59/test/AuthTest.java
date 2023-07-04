@@ -4,22 +4,18 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Configuration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.netology.quamid59.data.DataGenerator;
+import ru.netology.quamid59.data.DataGeneration;
 
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
-import static ru.netology.quamid59.data.DataGenerator.Registration.getRegisteredUser;
-import static ru.netology.quamid59.data.DataGenerator.Registration.getUser;
-import static ru.netology.quamid59.data.DataGenerator.getRandomLogin;
-import static ru.netology.quamid59.data.DataGenerator.getRandomPassword;
+import static ru.netology.quamid59.data.DataGeneration.Registration.getRegisteredUser;
+
 
 public class AuthTest {
 
-    @BeforeEach
-    void setup() {
-        open("http://localhost:9999");
+
+    @BeforeEach void setUp() {
+        open("http://localhost:9999/");
         Configuration.holdBrowserOpen = true;
     }
 
@@ -29,56 +25,93 @@ public class AuthTest {
         clearBrowserLocalStorage();
     }
 
-
     @Test
-    @DisplayName("Should successfully login with active registered user")
-    void shouldSuccessfulLoginIfRegisteredActiveUser() {
-        var registeredUser = getRegisteredUser("active");
-        $("[data-test-id=login] input").setValue(registeredUser.getLogin());
-        $("[data-test-id=password] input").setValue(registeredUser.getPassword());
-        $("button[data-test-id=action-login]").click();
-        $("h2.heading.heading_size_l.heading_theme_alfa-on-white").shouldHave(text("Личный кабинет"));
+    void userActive() {
+        var validUser = getRegisteredUser("active");
+        $("[data-test-id=login] .input__box .input__control").val(validUser.getLogin());
+        $("[data-test-id=password] .input__box .input__control").val(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("h2").shouldHave(Condition.exactText("  Личный кабинет"));
+
     }
 
     @Test
-    @DisplayName("Should get error message if login with not registered user")
-    void shouldGetErrorIfNotRegisteredUser() {
-        var notRegisteredUser = getUser("active");
-        $("[data-test-id='login'] input").setValue(notRegisteredUser.getLogin());
-        $("[data-test-id='password'] input").setValue(notRegisteredUser.getPassword());
-        $("button[data-test-id=action-login]").click();
-        $("[data-test-id='error-notification'] [class='notification__content']").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    void userBlocked() {
+        var validUser = getRegisteredUser("blocked");
+        $("[data-test-id=login] .input__box .input__control").val(validUser.getLogin());
+        $("[data-test-id=password] .input__box .input__control").val(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Пользователь заблокирован"));
     }
 
     @Test
-    @DisplayName("Should get error message if login with blocked registered user")
-    void shouldGetErrorIfBlockedUser() {
-        var blockedUser = getRegisteredUser("blocked");
-        $("[data-test-id='login'] input").setValue(blockedUser.getLogin());
-        $("[data-test-id='password'] input").setValue(blockedUser.getPassword());
-        $("button[data-test-id=action-login]").click();
-        $("[data-test-id='error-notification'] [class='notification__content']").shouldHave(Condition.exactText("Ошибка! " + "Пользователь заблокирован"));
+    void randomLoginUnregistered() {
+        var invalidUser = DataGeneration.Registration.getUser("blocked");
+        $("[data-test-id=login] .input__box .input__control").val(DataGeneration.Registration.getRandomLogin());
+        $("[data-test-id=password] .input__box .input__control").val(invalidUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
     }
 
     @Test
-    @DisplayName("Should get error message if login with wrong login")
-    void shouldGetErrorIfWrongLogin() {
-        var registeredUser = getRegisteredUser("active");
-        var wrongLogin = getRandomLogin();
-        $("[data-test-id='login'] input").setValue(wrongLogin);
-        $("[data-test-id='password'] input").setValue(registeredUser.getPassword());
-        $("button[data-test-id=action-login]").click();
-        $("[data-test-id='error-notification'] [class='notification__content']").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    void randomPassUnregistered() {
+        var invalidUser = DataGeneration.Registration.getUser("blocked");
+        $("[data-test-id=login] .input__box .input__control").val(invalidUser.getLogin());
+        $("[data-test-id=password] .input__box .input__control").val(DataGeneration.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
     }
 
     @Test
-    @DisplayName("Should get error message if login with wrong password")
-    void shouldGetErrorIfWrongPassword() {
-        var registeredUser = getRegisteredUser("active");
-        var wrongPassword = getRandomPassword();
-        $("[data-test-id='login'] input").setValue(registeredUser.getLogin());
-        $("[data-test-id='password'] input").setValue(wrongPassword);
-        $("button[data-test-id=action-login]").click();
-        $("[data-test-id='error-notification'] [class='notification__content']").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    void srandomPassAndLoginRegistered() {
+        $("[data-test-id=login] .input__box .input__control").val(DataGeneration.Registration.getRandomLogin());
+        $("[data-test-id=password] .input__box .input__control").val(DataGeneration.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void randomLoginRegistered() {
+        var validUser = getRegisteredUser("blocked");
+        $("[data-test-id=login] .input__box .input__control").val(DataGeneration.Registration.getRandomLogin());
+        $("[data-test-id=password] .input__box .input__control").val(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void randomPassRegistered() {
+        var validUser = getRegisteredUser("blocked");
+        $("[data-test-id=login] .input__box .input__control").val(validUser.getLogin());
+        $("[data-test-id=password] .input__box .input__control").val(DataGeneration.Registration.getRandomPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.exactText("Ошибка! " + "Неверно указан логин или пароль"));
+    }
+
+    @Test
+    void loginNotification() {
+        var validUser = getRegisteredUser("active");
+        $("[data-test-id=login] .input__box .input__control").val();
+        $("[data-test-id=password] .input__box .input__control").val(validUser.getPassword());
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=login].input_invalid .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void passNotification() {
+        var validUser = getRegisteredUser("active");
+        $("[data-test-id=login] .input__box .input__control").val(validUser.getLogin());
+        $("[data-test-id=password] .input__box .input__control").val();
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=password].input_invalid .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
+    }
+    @Test
+    void bothNotifications() {
+        $("[data-test-id=login] .input__box .input__control").val();
+        $("[data-test-id=password] .input__box .input__control").val();
+        $("[data-test-id=action-login]").click();
+        $("[data-test-id=login].input_invalid .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
+        $("[data-test-id=password].input_invalid .input__sub").shouldHave(Condition.exactText("Поле обязательно для заполнения"));
     }
 }
+
